@@ -13,7 +13,7 @@ export class GeminiService {
         @InjectPinoLogger(GeminiService.name) private readonly logger: PinoLogger,
         private readonly gcsService: GCSService
     ) {
-        this.projectId = process.env.GCP_PROJECT_ID || 'circular-signal-447313-m4';
+        this.projectId = process.env.GCP_PROJECT_ID;
         this.location = process.env.GCP_LOCATION || 'us-central1';
     }
 
