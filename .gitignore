@@ -12,6 +12,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+.env
+gcpConfig.json
+
 # OS
 .DS_Store
 
