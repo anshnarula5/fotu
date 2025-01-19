@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ImageAnalysisController } from "./image-analysis.controller";
 import { ImageAnalysisService } from "./image-analysis.service";
-import { GeminiModule } from "src/gemini/gemini.module";
+import { GCPModule } from "src/gcp/gcp.module"
 
 @Module({
-    imports: [GeminiModule],
+    imports: [GCPModule],
     controllers: [ImageAnalysisController],
     exports: [],
     providers: [ImageAnalysisService]

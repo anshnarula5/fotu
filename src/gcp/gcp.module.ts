@@ -4,7 +4,7 @@ import { GCSService } from "./gcs.service";
 
 @Module({
     imports: [],
-    exports: [GeminiService, GCSService],
+    exports: [GeminiService, GCSService, ],
     providers: [GeminiService, GCSService]
 })
-export class GeminiModule{}
+export class GCPModule{}

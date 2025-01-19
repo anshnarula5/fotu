@@ -1,16 +1,17 @@
-import { Injectable, BadRequestException, Scope } from '@nestjs/common'
+import { Injectable, BadRequestException, Scope, HttpException, HttpStatus } from '@nestjs/common'
 import { Storage, UploadResponse } from '@google-cloud/storage'
 import * as path from 'path'
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class GCSService {
-    private storage: Storage;
-    private bucketName: string;
+    private readonly storage: Storage;
+    private readonly bucketName: string;
     constructor(
         @InjectPinoLogger(GCSService.name) private readonly logger: PinoLogger
     ) {
         this.storage = new Storage();
+        this.bucketName = "fotu";
         this.logger.info(`GCSService instance created`);
     }
 
@@ -26,18 +27,56 @@ export class GCSService {
         return url;
     }
 
+    async listBuckets() {
+      try {
+        const [buckets] = await this.storage.getBuckets();
+        console.log('Buckets:');
+        buckets.forEach((bucket) => console.log(bucket.name));
+      } catch (error) {
+        console.error('Error listing buckets:', error.message);
+      }
+    }
+
+    async uploadImage(file: Express.Multer.File): Promise<string> {
+      return new Promise((resolve, reject) => {
+        const { originalname, buffer } = file;
+        this.logger.info("Uploading image to bucket");
+        const bucket = this.storage.bucket('fotu')
+        const blob = bucket.file(originalname.replace(/ /g, '_'));
+  
+        // Create a writable stream to upload the file
+        const blobStream = blob.createWriteStream({
+          resumable: false,
+        });
+  
+        blobStream
+          .on('finish', () => {
+            // Construct the GCS URI (gs://bucket-name/file-name)
+            const gcsUri = `gs://${bucket.name}/${blob.name}`;
+            this.logger.info(`GCS URI: ${gcsUri}`);
+
+            resolve(gcsUri); // Resolve with the GCS URI
+          })
+          .on('error', (err) => {
+            this.logger.info(`Error uploading image to bucket : ${JSON.stringify(err)}`);
+            reject(`Unable to upload image: ${err.message}`);
+          })
+          .end(buffer); // Write the file buffer and end the stream
+      });
+    }
+
+    
+
     // async uploadFile(localFilePath: string, destinationFileName: string): Promise<string> {
     //     try {
     //         // Upload the file
     //         const uploadedResource: UploadResponse = await this.storage.bucket(this.bucketName).upload(localFilePath, {
     //             destination: destinationFileName,
-    //             // gzip: true, // Optional: Gzip the file for better performance
     //             metadata: {
-    //                 // cacheControl: 'public, max-age=31536000', // Optional: Cache control
     //             },
     //         })
     //         this.logger.info(`${localFilePath} uploaded to ${this.bucketName}/${destinationFileName}`);
-    //         const resourceReadUrl = await this.generateV4ReadSignedUrl(destinationFileName)
+    //         const resourceReadUrl = await this.generateV4ReadSignedUrl("fotu", destinationFileName)
     //         this.logger.info(`${localFilePath} uploaded resource details : ${resourceReadUrl}`);
     //         return resourceReadUrl
     //     } catch (error) {

@@ -17,7 +17,7 @@ export class GeminiService {
         this.location = process.env.GCP_LOCATION || 'us-central1';
     }
 
-    async analyzeImage(): Promise<any> {
+    async analyzeImage(gcsUri: string): Promise<any> {
         try {
             // Initialize VertexAI client
             const vertexAI = new VertexAI({
@@ -30,7 +30,8 @@ export class GeminiService {
                 model: 'gemini-1.5-flash-001',
             });
 
-            const fileSignedUrl = await this.gcsService.generateV4ReadSignedUrl("fotu", "test")
+            const fileSignedUrl = gcsUri;
+            // const fileSignedUrl = await this.gcsService.generateV4ReadSignedUrl("fotu", "test") 
             console.log(fileSignedUrl);
 
             const filePart = {
